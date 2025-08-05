@@ -1,6 +1,7 @@
 // ui/view/MainActivity.kt
 package com.example.storybookapiintegration.ui.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                             binding.storiesRecyclerView.visibility = View.VISIBLE
                             val adapter = StoryAdapter(stories) { story ->
                                 // Handle story click
+                                startActivity(Intent(this, StoryDetailsActivity::class.java))
                             }
                             binding.storiesRecyclerView.adapter = adapter
                         }

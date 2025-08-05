@@ -15,6 +15,7 @@ databinding = "8.12.0"
 retrofit = "2.9.0"
 glide = "4.16.0"
 databindingRuntime = "8.12.0"
+activityVersion = "1.10.1"
 
 [libraries]
 # Core
@@ -48,6 +49,7 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 # Image Loading
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 databinding-runtime = { group = "androidx.databinding", name = "databinding-runtime", version.ref = "databindingRuntime" }
+activity = { group = "androidx.activity", name = "activity", version.ref = "activityVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
