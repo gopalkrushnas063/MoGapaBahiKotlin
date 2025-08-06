@@ -15,15 +15,22 @@ class StoryRepository(private val apiService: ApiService) {
         return try {
             withContext(Dispatchers.IO) {
                 val response = apiService.getAllStories()
-                Log.d("API_RESPONSE", "Response: $response")
                 Resource.Success(response)
             }
-        } catch (e: HttpException) {
-            Log.e("API_ERROR", "HTTP error: ${e.message}")
-            Resource.Error(e.message ?: "An unknown error occurred")
         } catch (e: Exception) {
-            Log.e("API_ERROR", "Error: ${e.message}")
             Resource.Error(e.message ?: "An unknown error occurred")
         }
+    }
+
+    suspend fun getStoryTypes(): Resource<List<String>> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val response = apiService.getAllStories()
+                val types = response.map { it.type }.distinct()
+                Resource.Success(types)
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to fetch story types")
+        } as Resource<List<String>>
     }
 }

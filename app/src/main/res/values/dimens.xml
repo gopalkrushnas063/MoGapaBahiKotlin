@@ -2,4 +2,9 @@
 <resources>
     <dimen name="dot_size">12dp</dimen>
     <dimen name="dot_margin">8dp</dimen>
+    <!-- For grid layout -->
+    <dimen name="grid_padding">8dp</dimen>
+    <dimen name="grid_item_margin">4dp</dimen>
+    <dimen name="grid_item_padding">8dp</dimen>
+    <dimen name="card_corner_radius">16dp</dimen>
 </resources>

@@ -1,4 +1,5 @@
 [versions]
+shimmer = "0.5.0"
 agp = "8.12.0"
 kotlin = "2.2.0"
 coreKtx = "1.16.0"
@@ -18,6 +19,7 @@ databindingRuntime = "8.12.0"
 activityVersion = "1.10.1"
 
 [libraries]
+facebook-shimmer = { group = "com.facebook.shimmer", name = "shimmer", version.ref = "shimmer" }
 # Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
