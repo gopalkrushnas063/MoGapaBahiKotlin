@@ -22,14 +22,10 @@ class GridSpacingItemDecoration(
         val column = position % spanCount
 
         if (includeEdge) {
-            // Add spacing to all sides
             outRect.left = spacing - column * spacing / spanCount
             outRect.right = (column + 1) * spacing / spanCount
-
-            if (position < spanCount) { // Top row
-                outRect.top = spacing
-            }
-            outRect.bottom = spacing // Add bottom spacing to all items
+            outRect.top = spacing
+            outRect.bottom = spacing
         } else {
             outRect.left = column * spacing / spanCount
             outRect.right = spacing - (column + 1) * spacing / spanCount

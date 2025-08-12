@@ -2,12 +2,15 @@ package com.example.storybookapiintegration.ui.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.example.storybookapiintegration.R
 import com.example.storybookapiintegration.data.model.Story
 import com.example.storybookapiintegration.data.remote.RetrofitInstance
@@ -31,6 +34,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var storyAdapter: StoryAdapter
     private lateinit var latestStoriesAdapter: LatestStoriesAdapter
 
+    // Auto-scroll handler and runnable
+    private val carouselAutoScrollHandler = Handler(Looper.getMainLooper())
+    private var carouselAutoScrollRunnable: Runnable? = null
+    private val carouselScrollDelay = 3000L // 3 seconds delay between slides
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -42,11 +50,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        // Setup carousel
         latestStoriesAdapter = LatestStoriesAdapter(emptyList()) { story ->
             openStoryDetails(story)
         }
-        binding.carouselViewPager.adapter = latestStoriesAdapter
+
+        binding.carouselViewPager.apply {
+            adapter = latestStoriesAdapter
+            offscreenPageLimit = 3
+            clipToPadding = false
+            clipChildren = false
+            getChildAt(0)?.overScrollMode = View.OVER_SCROLL_NEVER
+
+            // Set fixed height
+            layoutParams.height = (resources.displayMetrics.heightPixels * 0.3).toInt()
+
+            // Add padding to create space between items
+            val peekOffset = resources.getDimensionPixelOffset(R.dimen.carousel_peek_offset)
+            setPadding(peekOffset, 0, peekOffset, 0)
+
+            // Add page transformer for smooth scrolling
+            setPageTransformer { page, position ->
+                // This creates the spacing effect while maintaining full-width pages
+                page.translationX = peekOffset * position
+            }
+        }
+
+        setupAutoScrollingCarousel()
 
         // Setup recycler view with GridLayoutManager
         setupRecyclerView()
@@ -56,6 +85,43 @@ class MainActivity : AppCompatActivity() {
         binding.carouselViewPager.visibility = View.GONE
         binding.tabLayout.visibility = View.GONE
         binding.storiesRecyclerView.visibility = View.GONE
+    }
+
+    private fun setupAutoScrollingCarousel() {
+        binding.carouselViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                // Reset auto-scroll when user manually changes page
+                resetAutoScroll()
+            }
+        })
+
+        startAutoScroll()
+    }
+
+    private fun startAutoScroll() {
+        carouselAutoScrollRunnable = object : Runnable {
+            override fun run() {
+                val currentItem = binding.carouselViewPager.currentItem
+                val itemCount = latestStoriesAdapter.itemCount
+
+                if (itemCount > 0) {
+                    val nextItem = if (currentItem == itemCount - 1) 0 else currentItem + 1
+                    binding.carouselViewPager.setCurrentItem(nextItem, true)
+                }
+
+                carouselAutoScrollHandler.postDelayed(this, carouselScrollDelay)
+            }
+        }
+
+        carouselAutoScrollRunnable?.let {
+            carouselAutoScrollHandler.postDelayed(it, carouselScrollDelay)
+        }
+    }
+
+    private fun resetAutoScroll() {
+        carouselAutoScrollHandler.removeCallbacks(carouselAutoScrollRunnable ?: return)
+        startAutoScroll()
     }
 
     private fun setupRecyclerView() {
@@ -93,6 +159,7 @@ class MainActivity : AppCompatActivity() {
 
                         // Update carousel with latest 5 stories
                         latestStoriesAdapter.updateStories(stories.take(5))
+                        binding.carouselViewPager.setCurrentItem(latestStoriesAdapter.middlePosition, false)
 
                         // Update main list
                         storyAdapter.updateStories(stories)
@@ -224,6 +291,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        carouselAutoScrollHandler.removeCallbacks(carouselAutoScrollRunnable ?: return)
         binding.shimmerCarousel.stopShimmer()
         binding.shimmerStoryList.stopShimmer()
     }
@@ -234,5 +302,11 @@ class MainActivity : AppCompatActivity() {
             binding.shimmerCarousel.startShimmer()
             binding.shimmerStoryList.startShimmer()
         }
+        resetAutoScroll()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        carouselAutoScrollHandler.removeCallbacks(carouselAutoScrollRunnable ?: return)
     }
 }

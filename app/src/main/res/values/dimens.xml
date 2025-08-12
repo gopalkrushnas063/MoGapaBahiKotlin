@@ -7,4 +7,8 @@
     <dimen name="grid_item_margin">4dp</dimen>
     <dimen name="grid_item_padding">8dp</dimen>
     <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="grid_spacing">8dp</dimen>
+    <dimen name="carousel_page_margin">16dp</dimen>
+    <dimen name="carousel_offset">10dp</dimen>
+    <dimen name="carousel_peek_offset">10dp</dimen>
 </resources>

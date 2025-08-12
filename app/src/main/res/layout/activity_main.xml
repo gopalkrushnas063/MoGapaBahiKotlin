@@ -42,11 +42,11 @@
             android:id="@+id/carouselTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Latest Stories"
-            android:textSize="18sp"
-            android:textStyle="bold"
             android:padding="16dp"
-            android:textColor="@android:color/white"/>
+            android:text="@string/latest_stories"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/carouselViewPager"

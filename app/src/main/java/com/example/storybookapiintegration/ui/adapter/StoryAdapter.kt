@@ -68,8 +68,8 @@ class StoryAdapter(
         // Set fixed width for grid items
         val displayMetrics = parent.context.resources.displayMetrics
         val screenWidth = displayMetrics.widthPixels
-        val padding = parent.context.resources.getDimensionPixelSize(R.dimen.grid_item_padding)
-        val columnWidth = (screenWidth - (2 * padding)) / 2
+        val spacing = parent.context.resources.getDimensionPixelSize(R.dimen.grid_spacing)
+        val columnWidth = (screenWidth - (3 * spacing)) / 2 // 3 spacings: left, middle, right
 
         binding.root.layoutParams.width = columnWidth
         return StoryViewHolder(binding)
