@@ -3,8 +3,6 @@
     <style name="Base.Theme.StoryBookAPIIntegration" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="android:statusBarColor">@color/black</item>
-        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <style name="Theme.StoryBookAPIIntegration" parent="Base.Theme.StoryBookAPIIntegration" />
