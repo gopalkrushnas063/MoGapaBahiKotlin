@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 android {
@@ -72,5 +73,20 @@ dependencies {
     implementation(libs.facebook.shimmer)
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+
+    // Dagger Hilt
+    implementation("com.google.dagger:hilt-android:2.48.1")
+    kapt("com.google.dagger:hilt-compiler:2.48.1")
+
+    // Make sure Kotlin version is compatible
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
+
+    // Room Database - Use newer version
+    implementation("androidx.room:room-runtime:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+    kapt("androidx.room:room-compiler:2.7.0")
+
+    // WorkManager (optional for background tasks)
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
 }

@@ -93,6 +93,7 @@
             android:layout_height="wrap_content"
             android:background="@color/black"
             app:tabMode="scrollable"
+            app:tabIndicatorColor="@color/orange"
             app:tabTextColor="@android:color/white"
             app:tabSelectedTextColor="@color/orange"/>
 
