@@ -1,6 +1,6 @@
-// StoryDetailsActivity.kt
 package com.example.storybookapiintegration.ui.view
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -9,6 +9,7 @@ import com.example.storybookapiintegration.data.model.Story
 import com.example.storybookapiintegration.databinding.ActivityStoryDetailsBinding
 
 class StoryDetailsActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityStoryDetailsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,6 +17,21 @@ class StoryDetailsActivity : AppCompatActivity() {
         binding = ActivityStoryDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupToolbar()
+        displayStory()
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+        // Set back button click listener
+        binding.toolbar.setNavigationOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private fun displayStory() {
         val story = intent.getParcelableExtra<Story>("STORY_DATA")
         story?.let { renderStory(it) }
     }
@@ -47,6 +63,14 @@ class StoryDetailsActivity : AppCompatActivity() {
             storyTitle.text = story.title
             storyType.text = story.type ?: "Unknown"
             storyContent.text = story.content
+
+            // Set toolbar title to story title
+            binding.toolbar.title = story.title
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
     }
 }

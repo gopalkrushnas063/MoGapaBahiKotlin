@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.storybookapiintegration.R
+import com.example.storybookapiintegration.data.model.Story
 import com.example.storybookapiintegration.data.remote.RetrofitInstance
 import com.example.storybookapiintegration.data.repository.StoryRepository
 import com.example.storybookapiintegration.databinding.FragmentHomeBinding
@@ -20,8 +21,6 @@ import com.example.storybookapiintegration.ui.viewmodel.StoryViewModel
 import com.example.storybookapiintegration.ui.viewmodel.StoryViewModelFactory
 import com.example.storybookapiintegration.utils.Resource
 import com.google.android.material.tabs.TabLayout
-import androidx.viewpager2.widget.ViewPager2
-import com.example.storybookapiintegration.data.model.Story
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -35,6 +34,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val carouselAutoScrollHandler = Handler(Looper.getMainLooper())
     private var carouselAutoScrollRunnable: Runnable? = null
     private val carouselScrollDelay = 3000L
+    private var isFragmentVisible = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,6 +43,30 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         setupViews()
         setupObservers()
         viewModel.fetchAllStories()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isFragmentVisible = true
+        if (viewModel.stories.value is Resource.Loading) {
+            binding.shimmerCarousel.startShimmer()
+            binding.shimmerStoryList.startShimmer()
+        }
+        startAutoScroll()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isFragmentVisible = false
+        stopAutoScroll()
+        binding.shimmerCarousel.stopShimmer()
+        binding.shimmerStoryList.stopShimmer()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        stopAutoScroll()
+        _binding = null
     }
 
     private fun setupViews() {
@@ -64,7 +88,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
-        setupAutoScrollingCarousel()
         setupRecyclerView()
 
         binding.carouselTitle.visibility = View.GONE
@@ -73,36 +96,40 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.storiesRecyclerView.visibility = View.GONE
     }
 
-    private fun setupAutoScrollingCarousel() {
-        binding.carouselViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                resetAutoScroll()
-            }
-        })
-        startAutoScroll()
-    }
-
     private fun startAutoScroll() {
+        if (!isFragmentVisible) return
+
+        stopAutoScroll() // Clear any existing runnable
+
         carouselAutoScrollRunnable = object : Runnable {
             override fun run() {
-                val currentItem = binding.carouselViewPager.currentItem
-                val itemCount = latestStoriesAdapter.itemCount
-                if (itemCount > 0) {
-                    val nextItem = if (currentItem == itemCount - 1) 0 else currentItem + 1
-                    binding.carouselViewPager.setCurrentItem(nextItem, true)
+                if (!isFragmentVisible || _binding == null) return
+
+                try {
+                    val currentItem = binding.carouselViewPager.currentItem
+                    val itemCount = latestStoriesAdapter.itemCount
+                    if (itemCount > 0) {
+                        val nextItem = if (currentItem == itemCount - 1) 0 else currentItem + 1
+                        binding.carouselViewPager.setCurrentItem(nextItem, true)
+                    }
+
+                    if (isFragmentVisible && _binding != null) {
+                        carouselAutoScrollHandler.postDelayed(this, carouselScrollDelay)
+                    }
+                } catch (e: Exception) {
+                    // Handle any exceptions to prevent crash
                 }
-                carouselAutoScrollHandler.postDelayed(this, carouselScrollDelay)
             }
         }
+
         carouselAutoScrollRunnable?.let {
             carouselAutoScrollHandler.postDelayed(it, carouselScrollDelay)
         }
     }
 
-    private fun resetAutoScroll() {
-        carouselAutoScrollHandler.removeCallbacks(carouselAutoScrollRunnable ?: return)
-        startAutoScroll()
+    private fun stopAutoScroll() {
+        carouselAutoScrollHandler.removeCallbacksAndMessages(null)
+        carouselAutoScrollRunnable = null
     }
 
     private fun setupRecyclerView() {
@@ -241,27 +268,5 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         startActivity(Intent(requireContext(), StoryDetailsActivity::class.java).apply {
             putExtra("STORY_DATA", story)
         })
-    }
-
-    override fun onPause() {
-        super.onPause()
-        carouselAutoScrollHandler.removeCallbacks(carouselAutoScrollRunnable ?: return)
-        binding.shimmerCarousel.stopShimmer()
-        binding.shimmerStoryList.stopShimmer()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (viewModel.stories.value is Resource.Loading) {
-            binding.shimmerCarousel.startShimmer()
-            binding.shimmerStoryList.startShimmer()
-        }
-        resetAutoScroll()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        carouselAutoScrollHandler.removeCallbacks(carouselAutoScrollRunnable ?: return)
-        _binding = null
     }
 }
